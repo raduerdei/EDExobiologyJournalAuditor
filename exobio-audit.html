@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ED Exobiology Ledger & Audit</title>
+  <style>
+    :root {
+      --bg: #0b0e14;
+      --panel: #131822;
+      --border: #252f42;
+      --accent: #ff7b00;
+      --cyan: #38bdf8;
+      --green: #22c55e;
+      --red: #ef4444;
+      --text: #e2e8f0;
+      --muted: #8b9bb4;
+    }
+    * { box-sizing: border-box; font-family: 'Segoe UI', Consolas, monospace; }
+    body {
+      margin: 0;
+      padding: 24px;
+      background: var(--bg);
+      color: var(--text);
+    }
+    .container { max-width: 1400px; margin: 0 auto; }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 16px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    h1 {
+      margin: 0;
+      font-size: 1.4rem;
+      color: var(--accent);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+    .controls {
+      display: flex;
+      gap: 14px;
+      align-items: flex-end;
+      background: var(--panel);
+      padding: 16px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+    .field { display: flex; flex-direction: column; gap: 6px; }
+    label { font-size: 0.78rem; color: var(--muted); text-transform: uppercase; }
+    input[type="datetime-local"], select {
+      background: #090c10;
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 8px 12px;
+      border-radius: 4px;
+      font-size: 0.9rem;
+    }
+    button {
+      background: var(--accent);
+      color: #000;
+      border: none;
+      padding: 9px 18px;
+      font-weight: 700;
+      border-radius: 4px;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    button:hover { filter: brightness(1.1); }
+    button:disabled { opacity: 0.45; cursor: not-allowed; filter: none; }
+    .tip-box {
+      background: rgba(56, 189, 248, 0.08);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      color: var(--text);
+      padding: 10px 14px;
+      border-radius: 4px;
+      font-size: 0.83rem;
+      margin-bottom: 16px;
+    }
+    .tip-box strong { color: var(--cyan); }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+    .stat-card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent);
+      padding: 14px 16px;
+      border-radius: 4px;
+    }
+    .stat-card.cyan { border-left-color: var(--cyan); }
+    .stat-card.green { border-left-color: var(--green); }
+    .stat-label { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; }
+    .stat-val { font-size: 1.45rem; font-weight: 700; margin-top: 4px; }
+    .meta-bar {
+      font-size: 0.82rem;
+      color: var(--muted);
+      margin-bottom: 14px;
+      background: var(--panel);
+      padding: 10px 14px;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .meta-bar span strong { color: var(--cyan); }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      font-size: 0.86rem;
+    }
+    th, td {
+      padding: 10px 12px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    th {
+      background: #18202c;
+      color: var(--accent);
+      font-size: 0.76rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    tr:hover { background: rgba(255, 255, 255, 0.02); }
+    .num { text-align: right; font-variant-numeric: tabular-nums; }
+    .badge {
+      display: inline-block;
+      padding: 2px 7px;
+      border-radius: 3px;
+      font-size: 0.73rem;
+      font-weight: 700;
+    }
+    .badge-ff { background: rgba(34, 197, 94, 0.18); color: var(--green); border: 1px solid var(--green); }
+    .badge-no { background: rgba(239, 68, 68, 0.16); color: var(--red); border: 1px solid var(--red); }
+    .badge-sold { background: rgba(56, 189, 248, 0.15); color: var(--cyan); }
+    .path-hint { font-size: 0.82rem; color: var(--muted); margin-top: 4px; }
+    code { background: #1c2433; padding: 2px 6px; border-radius: 3px; color: var(--cyan); user-select: all; }
+    .copy-btn {
+      background: #1c2433;
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding: 2px 8px;
+      font-size: 0.72rem;
+      margin-left: 6px;
+      vertical-align: middle;
+    }
+    .evidence { font-size: 0.73rem; color: var(--muted); display: block; margin-top: 2px; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <div>
+      <h1>Elite Dangerous // Exobiology Journal Auditor</h1>
+      <div class="path-hint">
+        Journal Folder: <code id="folderPath">%USERPROFILE%\Saved Games\Frontier Developments\Elite Dangerous</code>
+        <button class="copy-btn" id="btnCopyPath" title="Copy path to paste into the file dialog address bar">Copy Path</button>
+      </div>
+    </div>
+    <div>
+      <input type="file" id="journalFileInput" accept=".log" multiple style="display:none" />
+      <button id="btnBrowse">1. Browse Journal Log(s)</button>
+    </div>
+  </header>
+
+  <div class="tip-box">
+    <strong>Important:</strong> <em>Elite Dangerous</em> creates a separate <code>Journal.*.log</code> file for every game session. To capture all scans across multiple days/sessions (like Nov 20 &amp; Nov 21), hold <strong>Ctrl</strong> or <strong>Shift</strong> in the file dialog and select <strong>all</strong> log files covering your expedition.
+  </div>
+
+  <div class="controls">
+    <div class="field">
+      <label for="startDate">2. Filter Events From (Local Time)</label>
+      <input type="datetime-local" id="startDate" />
+    </div>
+    <div class="field">
+      <label for="soldFilter">Turn-In Status</label>
+      <select id="soldFilter">
+        <option value="unsold">Uncashed Samples Only (Current Hold)</option>
+        <option value="all">All Samples Since Start Date (Including Sold)</option>
+      </select>
+    </div>
+    <button id="btnGenerate" disabled>3. Parse &amp; Generate Report</button>
+  </div>
+
+  <div class="meta-bar" id="metaBar">
+    <span>Status: <strong>Step 1: Click "Browse Journal Log(s)" and select all relevant Journal.*.log files</strong></span>
+    <span>Selected File(s): <strong id="selectedFileLabel">None</strong></span>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-label">Completed Species</div>
+      <div class="stat-val" id="statCount">0</div>
+    </div>
+    <div class="stat-card cyan">
+      <div class="stat-label">Base Vista Value</div>
+      <div class="stat-val" id="statBase">0 CR</div>
+    </div>
+    <div class="stat-card green">
+      <div class="stat-label">First Footfall Bonus (4x)</div>
+      <div class="stat-val" id="statBonus">0 CR</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Total Estimated Payout</div>
+      <div class="stat-val" style="color: var(--accent);" id="statTotal">0 CR</div>
+    </div>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Timestamp (Local)</th>
+        <th>System / Body</th>
+        <th>Species &amp; Variant</th>
+        <th>First Footfall (5x)</th>
+        <th>Status</th>
+        <th class="num">Base Value</th>
+        <th class="num">FF Bonus</th>
+        <th class="num">Total Payout</th>
+      </tr>
+    </thead>
+    <tbody id="resultsBody">
+      <tr><td colspan="8" style="text-align:center; color: var(--muted); padding: 28px;">Browse and select your Journal.*.log file(s) from the Elite Dangerous Saved Games folder to begin.</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<script>
+const SPECIES_VALUES = {
+  "aleoida arcus": 7252500, "aleoida coronamus": 6284600, "aleoida gravis": 12934900,
+  "aleoida laminiae": 3385200, "aleoida spica": 3385200, "amphora plant": 1628800,
+  "anemone": 1499900, "bacterium acies": 1000000, "bacterium alcyoneum": 1658500,
+  "bacterium aurasus": 1000000, "bacterium bullaris": 1152500, "bacterium cerbrus": 1689800,
+  "bacterium informem": 8418000, "bacterium nebulus": 5289900, "bacterium omentum": 4638900,
+  "bacterium scopulum": 4934500, "bacterium tela": 1949000, "bacterium verrata": 3897000,
+  "bacterium vesicula": 1000000, "bacterium volu": 7774700, "bark mounds": 1471900,
+  "brain tree": 1593700, "cactoida cortexum": 3667600, "cactoida lapis": 2483600,
+  "cactoida peperatis": 2483600, "cactoida pullulanta": 3667600, "cactoida vermis": 16202800,
+  "clypeus lacrimam": 8418000, "clypeus margaritus": 11873200, "clypeus speculumi": 16202800,
+  "concha aureolas": 7774700, "concha biconcavis": 19010800, "concha labiata": 2352400,
+  "concha renibus": 4572400, "crystalline shards": 1628800, "electricae pluma": 6284600,
+  "electricae radialem": 6284600, "fonticulua campestris": 1000000, "fonticulua digitos": 1804100,
+  "fonticulua fluctus": 20000000, "fonticulua lapida": 3111000, "fonticulua segmentatus": 19010800,
+  "fonticulua upupam": 5727600, "frutexa acus": 7774700, "frutexa collum": 1639800,
+  "frutexa fera": 1632500, "frutexa flabellum": 1808900, "frutexa flammasis": 10326000,
+  "frutexa metallicum": 1632500, "frutexa sponsae": 5988000, "fumerola aquatis": 6284600,
+  "fumerola carbosis": 6284600, "fumerola extremus": 16202800, "fumerola nitris": 7500900,
+  "fungoida bullarum": 3703200, "fungoida gelata": 3330300, "fungoida setisis": 1670100,
+  "fungoida stabitis": 2680300, "osseus cornibus": 1483000, "osseus discus": 12934900,
+  "osseus fractus": 4027800, "osseus pellebantus": 9739000, "osseus pumice": 3156300,
+  "osseus spiralis": 2404700, "recepta conditivus": 14313700, "recepta deltahedronix": 16202800,
+  "recepta umbrux": 12934900, "sinuous tubers": 1514500, "stratum araneamus": 2448900,
+  "stratum cucumisis": 16202800, "stratum excutitus": 2448900, "stratum frigus": 2637500,
+  "stratum laminamus": 2788300, "stratum limaxus": 1362000, "stratum paleas": 1362000,
+  "stratum tectonicas": 19010800, "tubus cavas": 11873200, "tubus compagibus": 7774700,
+  "tubus conifer": 2415500, "tubus rosarium": 2637500, "tubus sororibus": 5727600,
+  "tussock albata": 3252500, "tussock capillum": 7025800, "tussock caputus": 3472400,
+  "tussock catena": 1766600, "tussock cultro": 1766600, "tussock divisa": 1766600,
+  "tussock ignis": 1849000, "tussock pennata": 5853800, "tussock pennatis": 1000000,
+  "tussock propagito": 1000000, "tussock serrati": 4447100, "tussock stigmasis": 19010800,
+  "tussock triticum": 7774700, "tussock ventusa": 3227700, "tussock virgam": 14313700
+};
+
+let selectedFiles = [];
+let parsedRecords = [];
+
+const fileInput = document.getElementById('journalFileInput');
+const btnBrowse = document.getElementById('btnBrowse');
+const btnGenerate = document.getElementById('btnGenerate');
+const startDateInput = document.getElementById('startDate');
+const soldFilterInput = document.getElementById('soldFilter');
+const metaBar = document.getElementById('metaBar');
+
+document.getElementById('btnCopyPath').addEventListener('click', () => {
+  const pathText = document.getElementById('folderPath').textContent;
+  navigator.clipboard.writeText(pathText);
+  const btn = document.getElementById('btnCopyPath');
+  btn.textContent = 'Copied!';
+  setTimeout(() => btn.textContent = 'Copy Path', 1500);
+});
+
+btnBrowse.addEventListener('click', () => {
+  fileInput.value = '';
+  fileInput.click();
+});
+
+function parseJournalFilenameDate(name) {
+  const m = name.match(/^Journal\.(\d{4}-\d{2}-\d{2})T(\d{2})(\d{2})(\d{2})\.(\d+)\.log$/i);
+  if (!m) return null;
+  return {
+    date: new Date(`${m[1]}T${m[2]}:${m[3]}:${m[4]}Z`),
+    part: parseInt(m[5], 10)
+  };
+}
+
+function toLocalDatetimeInputString(dateObj) {
+  const tzOffsetMs = dateObj.getTimezoneOffset() * 60000;
+  return new Date(dateObj.getTime() - tzOffsetMs).toISOString().slice(0, 16);
+}
+
+function formatLocalTimestamp(dateObj) {
+  const pad = n => String(n).padStart(2, '0');
+  return `${dateObj.getFullYear()}-${pad(dateObj.getMonth() + 1)}-${pad(dateObj.getDate())} ` +
+         `${pad(dateObj.getHours())}:${pad(dateObj.getMinutes())}:${pad(dateObj.getSeconds())}`;
+}
+
+fileInput.addEventListener('change', (e) => {
+  const files = Array.from(e.target.files || []);
+  if (files.length === 0) return;
+
+  selectedFiles = files.map(f => {
+    const meta = parseJournalFilenameDate(f.name);
+    return {
+      file: f,
+      name: f.name,
+      date: meta ? meta.date : new Date(f.lastModified),
+      part: meta ? meta.part : 0
+    };
+  }).sort((a, b) => (a.date - b.date) || (a.part - b.part));
+
+  // Default Step 2 start date to the earliest selected log's local timestamp
+  startDateInput.value = toLocalDatetimeInputString(selectedFiles[0].date);
+  btnGenerate.disabled = false;
+
+  parseSelectedLogs();
+});
+
+btnGenerate.addEventListener('click', parseSelectedLogs);
+soldFilterInput.addEventListener('change', renderTable);
+
+async function parseSelectedLogs() {
+  if (selectedFiles.length === 0) return;
+
+  // datetime-local represents local time; new Date(val) parses as local time automatically
+  const startVal = startDateInput.value;
+  const filterStart = startVal ? new Date(startVal) : new Date(0);
+
+  let currentSystem = 'Unknown';
+  let currentSystemAddr = null;
+  const bodyNames = {};
+  const bodyScanInfo = {}; // key -> { wasDiscovered: bool, wasMapped: bool }
+  const bodyFFStatus = {}; // key -> { status: true | false, reason: string }
+  const scans = [];
+
+  for (const jf of selectedFiles) {
+    const text = await jf.file.text();
+    const lines = text.split(/\r?\n/);
+
+    for (const line of lines) {
+      if (!line.trim()) continue;
+      let ev;
+      try { ev = JSON.parse(line); } catch { continue; }
+
+      const evTime = new Date(ev.timestamp);
+
+      if (ev.event === 'Location' || ev.event === 'FSDJump' || ev.event === 'CarrierJump') {
+        currentSystem = ev.StarSystem || currentSystem;
+        currentSystemAddr = ev.SystemAddress || currentSystemAddr;
+      }
+
+      if (ev.event === 'Scan' && ev.BodyID !== undefined) {
+        const key = `${ev.SystemAddress || currentSystemAddr}_${ev.BodyID}`;
+        if (ev.BodyName) bodyNames[key] = ev.BodyName;
+        bodyScanInfo[key] = {
+          wasDiscovered: ev.WasDiscovered,
+          wasMapped: ev.WasMapped
+        };
+      }
+
+      // Evaluate Touchdown & Disembark accurately for First Footfall
+      if ((ev.event === 'Touchdown' || ev.event === 'Disembark') && ev.BodyID !== undefined) {
+        const key = `${ev.SystemAddress || currentSystemAddr}_${ev.BodyID}`;
+        if (ev.BodyName) bodyNames[key] = ev.BodyName;
+
+        // 1. Explicit FirstFootfall: true from the game is 100% authoritative
+        if (ev.FirstFootfall === true) {
+          bodyFFStatus[key] = { status: true, reason: `${ev.event}: FirstFootfall=true` };
+        }
+        // 2. Explicit FirstFootfall: false on Touchdown or ship Disembark (SRV: false) means another CMDR already claimed FF
+        else if (ev.FirstFootfall === false && (ev.event === 'Touchdown' || ev.SRV === false)) {
+          // Only set false if we didn't already confirm FirstFootfall: true earlier in this session
+          if (!bodyFFStatus[key] || bodyFFStatus[key].status !== true) {
+            bodyFFStatus[key] = { status: false, reason: `${ev.event}: FirstFootfall=false (Prior CMDR)` };
+          }
+        }
+      }
+
+      if (ev.event === 'ScanOrganic' && ev.ScanType === 'Analyse') {
+        const sysAddr = ev.SystemAddress || currentSystemAddr;
+        const key = `${sysAddr}_${ev.Body}`;
+        const speciesName = (ev.Species_Localised || ev.Species || 'Unknown').trim();
+        const variantFull = (ev.Variant_Localised || ev.Variant || '').trim();
+        // Extract short variant color/suffix if Variant_Localised includes species prefix
+        const variantShort = variantFull.toLowerCase().startsWith(speciesName.toLowerCase())
+          ? variantFull.slice(speciesName.length).replace(/^[\s\-–]+/, '').trim()
+          : variantFull;
+
+        const lookupKey = speciesName.toLowerCase();
+        const baseVal = SPECIES_VALUES[lookupKey] || 0;
+
+        // Determine First Footfall status & evidence
+        let isFF = false;
+        let ffReason = 'No FirstFootfall event logged';
+
+        if (bodyFFStatus[key]) {
+          isFF = bodyFFStatus[key].status;
+          ffReason = bodyFFStatus[key].reason;
+        } else if (bodyScanInfo[key]) {
+          // Fallback if game resumed while already landed (no Touchdown/Disembark in log)
+          if (bodyScanInfo[key].wasDiscovered === false) {
+            isFF = true;
+            ffReason = 'Scan: WasDiscovered=false';
+          } else {
+            isFF = false;
+            ffReason = 'Scan: WasDiscovered=true (No FF flag)';
+          }
+        }
+
+        scans.push({
+          timestampLocal: formatLocalTimestamp(evTime),
+          evTime,
+          system: currentSystem,
+          body: bodyNames[key] || `Body ID ${ev.Body}`,
+          species: speciesName,
+          variant: variantShort || '—',
+          baseVal,
+          isFF,
+          ffReason,
+          sold: false
+        });
+      }
+
+      if (ev.event === 'SellOrganicData' || ev.event === 'Resurrect') {
+        for (const s of scans) {
+          if (!s.sold) s.sold = true;
+        }
+      }
+    }
+  }
+
+  parsedRecords = scans.filter(s => s.evTime >= filterStart);
+
+  const fileSummary = selectedFiles.length === 1
+    ? `${selectedFiles[0].name} (1 session file)`
+    : `${selectedFiles.length} log files (${selectedFiles[0].name} → ${selectedFiles[selectedFiles.length - 1].name})`;
+
+  metaBar.innerHTML = `
+    <span>Report Generated: <strong>${parsedRecords.length}</strong> completed scan(s) since <strong>${startVal ? startVal.replace('T', ' ') : 'start of logs'}</strong></span>
+    <span>Source: <strong>${fileSummary}</strong></span>
+  `;
+
+  renderTable();
+}
+
+function formatCR(num) {
+  return num.toLocaleString('en-US') + ' CR';
+}
+
+function toggleFF(index) {
+  parsedRecords[index].isFF = !parsedRecords[index].isFF;
+  parsedRecords[index].ffReason = 'Manual override';
+  renderTable();
+}
+
+function renderTable() {
+  const soldFilter = soldFilterInput.value;
+  const tbody = document.getElementById('resultsBody');
+  tbody.innerHTML = '';
+
+  let totalCount = 0;
+  let totalBase = 0;
+  let totalBonus = 0;
+
+  parsedRecords.forEach((rec, idx) => {
+    if (soldFilter === 'unsold' && rec.sold) return;
+
+    const bonus = rec.isFF ? rec.baseVal * 4 : 0;
+    const payout = rec.baseVal + bonus;
+
+    totalCount++;
+    totalBase += rec.baseVal;
+    totalBonus += bonus;
+
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${rec.timestampLocal}</td>
+      <td><strong>${rec.system}</strong><br><span style="color:var(--muted);font-size:0.8rem">${rec.body}</span></td>
+      <td><strong>${rec.species}</strong><br><span style="color:var(--cyan);font-size:0.78rem">${rec.variant}</span></td>
+      <td>
+        <label style="cursor:pointer; display:inline-flex; align-items:center; gap:6px;">
+          <input type="checkbox" ${rec.isFF ? 'checked' : ''} onchange="toggleFF(${idx})" />
+          ${rec.isFF ? '<span class="badge badge-ff">YES (5x)</span>' : '<span class="badge badge-no">NO (1x)</span>'}
+        </label>
+        <span class="evidence">${rec.ffReason}</span>
+      </td>
+      <td>${rec.sold ? '<span class="badge badge-sold">SOLD</span>' : '<span class="badge badge-ff">IN HOLD</span>'}</td>
+      <td class="num">${formatCR(rec.baseVal)}</td>
+      <td class="num" style="color:var(--green)">${formatCR(bonus)}</td>
+      <td class="num" style="color:var(--accent); font-weight:700">${formatCR(payout)}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  if (totalCount === 0) {
+    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color: var(--muted); padding: 28px;">No matching completed exobiology scans found after the selected starting date.</td></tr>`;
+  }
+
+  document.getElementById('statCount').textContent = totalCount;
+  document.getElementById('statBase').textContent = formatCR(totalBase);
+  document.getElementById('statBonus').textContent = formatCR(totalBonus);
+  document.getElementById('statTotal').textContent = formatCR(totalBase + totalBonus);
+}
+</script>
+</body>
+</html>
