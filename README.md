@@ -1,4 +1,4 @@
-# Elite Dangerous // Exobiology Journal Auditor
+# Elite Dangerous Exobiology Journal Auditor
 
 **[🚀 Launch Live Web App](https://raduerdei.github.io/EDExobiologyJournalAuditor/)**
 
