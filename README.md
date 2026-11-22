@@ -19,7 +19,7 @@ Built for deep-space explorers who want an instant, verifiable accounting of wha
 
 ## Quick Start
 
-1. **Download:** Save `exobio-audit.html` anywhere on your computer.
+1. **Download:** Save `index.html` anywhere on your computer.
 2. **Open:** Launch the file in any modern web browser (Chrome, Edge, Brave, Firefox).
 3. **Select Logs:** Click **1. Browse Journal Log(s)**, navigate to your *Elite Dangerous* journal directory (use the built-in **Copy Path** button for quick access):
    ```text
