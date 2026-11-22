@@ -24,3 +24,4 @@ Built for deep-space explorers who want an instant, verifiable accounting of wha
 3. **Select Logs:** Click **1. Browse Journal Log(s)**, navigate to your *Elite Dangerous* journal directory (use the built-in **Copy Path** button for quick access):
    ```text
    %USERPROFILE%\Saved Games\Frontier Developments\Elite Dangerous
+![ED Exobiology Journal Auditor Preview](assets/preview.png)
