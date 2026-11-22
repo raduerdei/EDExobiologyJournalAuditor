@@ -1,5 +1,9 @@
 # Elite Dangerous // Exobiology Journal Auditor
 
+**[🚀 Launch Live Web App](https://raduerdei.github.io/EDExobiologyJournalAuditor/)**
+
+![ED Exobiology Journal Auditor Preview](assets/preview.png)
+
 A lightweight, zero-dependency, single-file HTML/JavaScript utility that parses local *Elite Dangerous* player journal logs (`Journal.*.log`) to audit completed exobiology scans, verify First Footfall eligibility, and calculate exact Vista Genomics payouts—including the 5x First Footfall multiplier.
 
 Built for deep-space explorers who want an instant, verifiable accounting of what is currently sitting in their genetic sampler without bloated background apps, database rescans, or inaccurate running wallet estimates.
@@ -24,4 +28,3 @@ Built for deep-space explorers who want an instant, verifiable accounting of wha
 3. **Select Logs:** Click **1. Browse Journal Log(s)**, navigate to your *Elite Dangerous* journal directory (use the built-in **Copy Path** button for quick access):
    ```text
    %USERPROFILE%\Saved Games\Frontier Developments\Elite Dangerous
-![ED Exobiology Journal Auditor Preview](assets/preview.png)
